@@ -1,0 +1,136 @@
+{% extends "student/stu_index.html" %}
+{% load stu_tags %}
+{% block page-content %}
+
+    <div class="panel panel-default">
+
+  <!-- Default panel contents -->
+  <div class="panel-heading">我的课程</div>
+
+    <div class="panel-body">
+        <h4>作业标题:{{ studyrecord_obj.course_record.homework_title }}</h4>
+        <h4>作业详情：</h4><pre style="min-height: 400px;">{{ studyrecord_obj.course_record.homework_content }}</pre>
+        <h4>老师评语：{{ studyrecord_obj.memo }}</h4>
+        <h4>本节成绩：{{ studyrecord_obj.score }}</h4>
+        <hr>
+        <div id="alert_area">
+        <!--已上传附件区-->
+            {% for attach_obj in homework_attach_objs %}
+                {% render_attach attach_obj forloop.counter0 %}
+            {% endfor %}
+        </div>
+        <p>
+                <form action="./" class="dropzone" id="myAwesomeDropzone" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="page" value="2">
+{#                    <div class="fallback">#}
+{#                        <input name="file" type="file" multiple/>#}
+{#                    </div>#}
+                    <div class="dz-default dz-message needsclick">
+                        <div class="dz-icon icon-wrap icon-circle icon-wrap-md">
+                            <i class="fa fa-cloud-upload fa-3x"></i>
+                        </div>
+                    <div>
+                        <p class="dz-text">请上传课程作业</p>
+                        <p class="text-muted">仅支持tar包文件</p>
+                    </div>
+        </div>
+                </form>
+                <form id="form_2" action="/account/login/" method="get" onsubmit="return PreSubmit_1();"></form>
+                </p>
+    </div>
+</div>
+{% endblock %}
+{% block css %}
+    <link href="/static/css/dropzone.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+{% endblock %}
+{% block js %}
+    <script src="/static/js/dropzone.js"></script>
+    <script src="/static/js/fastclick.js"></script>
+    <script src="/static/js/jquery.cookie.js"></script>
+     <script>
+       FastClick.attach(document.body);
+        file_count = 0;
+        alert_list = ["alert-info","alert-success","alert-danger"];
+
+        Dropzone.options.myAwesomeDropzone = {
+            paramName: "file", // The name that will be used to transfer the file
+            maxFilesize: 50, // MB
+            maxFiles: 10,
+{#            dictDefaultMessage: "请上传课程作业",#}
+            dictFileTooBig: "文件大小不能超过50M",
+{#            addRemoveLinks: true,#}
+            addRemoveLinks:false,
+            dictRemoveLinks: "x",
+            dictCancelUpload: "x",
+            accept: function (file, done) {
+                if (file.name == "justinbieber.jpg") {
+                    done("Naha, you don't.");
+                }
+                else {
+                    done();
+                }
+            },
+            init: function () {
+                //上传文件是判断文件的个是是否大于1
+                this.on("addedfile", function (file) {
+                    console.log("----------",this.files);
+                    //上传文件时触发的事件
+                    file_count = this.files.length;
+{#                    if(file_count>1){#}
+{#                        alert("文件数量不能超过1个");#}
+{#                        this.removeFile(file);#}
+{#                    }#}
+                    if(!this.files[0].name.match("tar")){
+                        alert("仅支持tar文件包相关格式");
+                        console.log("sadfffffff",file);
+                        this.removeFile(file);
+                    }
+                });
+                this.on("queuecomplete", function (file) {
+                    //上传完成后触发的方法
+
+                });
+                this.on("success", function (file,result) {
+                    var alert_color = alert_list[file_count%3];
+                    console.log(alert_color);
+                    $("#alert_area").append('<div class="alert '+alert_color+' alert-dismissable" style="display: inline-block;margin-left:5px;">\n' +
+                        '                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">\n' +
+                        '                                &times;\n' +
+                        '                            </button> <a href='+result+' >'+file.name+'</a>\n' +
+                        '                        </div>');
+
+
+                });
+
+                this.on("removedfile", function (file) {
+                    console.log("File " + file.name + "removed");
+                });
+            }
+        };
+
+        //已上传文件的删除操作
+        $("#alert_area").delegate(".alert","close.bs.alert", function () {
+            file_name = $(this).children().eq(1).text();
+            for(var i =0;i<$("[data-dz-name]").length;i++){
+                var tag = $("[data-dz-name]").eq(i);
+                if(tag.text() == file_name){
+                  tag.parent().parent().parent().remove();
+                }
+            }
+            $.ajax({
+                        type: 'post',
+                        url: "./",
+                        data:{"type":"delete","file_name":file_name},
+                        headers:{"X-CSRFtoken":$.cookie("csrftoken")},
+                        success: function (result) {
+                            alert(result);
+
+                        }
+                    });
+	    });
+
+
+    </script>
+{% endblock %}

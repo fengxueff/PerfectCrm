@@ -1,0 +1,180 @@
+{% extends "king_admin/base.html" %}
+{% load tags %}
+{% block content %}
+    <div class="row " style="margin-top: 50px">
+        <form class="form-horizontal" method="post" onsubmit="return Presumbit()">
+            {% csrf_token %}
+            <input type="hidden" name="page" value="{{ request.GET.page }}">
+            {% for field in model_form_obj %}
+                <div class="form-group">
+                    <!--由于label中自动的所字体加粗了，所以就需要设置字体为正常格式-->
+                    <label for="{{ field.id_for_label }}" class="col-sm-2 control-label" style="font-weight: normal">
+                        {% if field.field.required %}
+                            <b><a href="#" data-toggle="tooltip" data-placement="left"
+                                  title="{{ field.label }}">{{ field.name }}</a></b>
+                        {% else %}
+                            <a href="#" data-toggle="tooltip" data-placement="left"
+                               title="{{ field.label }}">{{ field.name }}</a>
+                        {% endif %}
+                    </label>
+                    <div class="col-md-6">
+                        <!--判断复选框-->
+                        {% if field.name in admin_class.filter_horizontal %}
+                            <div class="col-md-5">
+                                <!--备选框-->
+                                <select multiple  class="filter_mult_select mult_select">
+                                    {% build_select_mult_option admin_class model_form_obj field as mult_option %}
+                                    {% for option in mult_option %}
+                                        <option value="{{ option.id }}">{{ option }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-1">
+                                <div class="row" style="margin-top: 70px;margin-left: 1px;cursor: pointer;">
+                                    <a class="glyphicon glyphicon-arrow-right" aria-hidden="true"></a>
+                                </div>
+                                <div class="row" style="margin-left: 1px;cursor: pointer;">
+                                    <a class="glyphicon glyphicon-arrow-left" aria-hidden="true"></a>
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <!--已选框-->
+                                <select multiple  name="{{ field.name }}" class="filter_mult_select mult_selected">
+                                    {% build_selected_mult_option model_form_obj field as mult_option %}
+                                    {% for option in mult_option %}
+                                        <option value="{{ option.id }}">{{ option }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        {% else %}
+                            {{ field }}{% if field.help_text %}{{ field.help_text|safe }}{% endif %}
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        {% if field.errors %}
+                            <span id="error_msg" class="alert alert-danger">{{ field.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+{#                <hr>#}
+            {% endfor %}
+            <!--目前只处理修改只读字段错误-->
+            {%  for key,error in model_form_obj.errors.items %}
+                <div class="row">
+                    <div class="col-md-10">
+                        <div class="alert alert-danger alert-dismissable">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">
+                                &times;
+                            </button>{{ error }}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+
+            <div class="form-group col-md-10">
+                <a href="javascript:window.history.back();" class="btn btn-default pull-left">返回</a>
+                <!--如果readonly_table为true，表示整表数据不被修改或添加-->
+                <button type="submit" class="btn btn-success pull-right"{% if admin_class.readonly_table %} disabled {% endif %}>保存</button>
+            </div>
+        </form>
+    </div>
+    {% include "king_admin/reset_user_password.html" %}
+{% endblock %}
+{% block js %}
+    <script src="/static/js/jquery.cookie.js"></script>
+    <script>
+
+        $(function () {
+            $("#confirm_modify").click(function () {
+                 $("#error_msg li").remove();
+                var password1 = $("#password1").val();
+                var password2 = $("#password2").val();
+                $.ajax({
+                        type: 'POST',
+                        url: "password/",
+                        data:{"password1":password1,"password2":password2},
+                        headers:{"X-CSRFtoken":$.cookie("csrftoken")},
+                        success: function (result) {
+                            console.log(result);
+                            result = JSON.parse(result);
+                            if(result.status == 0){
+                                location.reload();
+                            }else{
+                                console.log("asdfsa");
+                                errors = result.errors;
+                                error_array = errors.split(";");
+                                var li_tags = "";
+                                for(var i=0;i<error_array.length;i++){
+                                    li_tags = li_tags + "<li>"+error_array[i]+"</li>";
+                                }
+                                $("#error_msg").append(li_tags);
+                                $("#error_msg").css({"display":"block"});
+                            }
+                        }
+                });
+            });
+
+            $('#myModal').modal(
+                {backdrop: 'static', show:false
+                }
+            );
+            $("#back_modify_passwd").click(function () {
+            $("#myModal").modal("hide");
+            });
+            $("[data-toggle='tooltip']").tooltip();
+
+            //对于动态添加的标签添加鼠标双击事件
+            $(".mult_select").delegate("option", "dblclick", function () {
+{#                $(this).remove();#}
+                //prop好用，而attr不能用，坑。。。
+                $(this).prop("selected", false);
+                $(this).parent().parent().parent().find(".mult_selected").append($(this));
+            });
+            $(".mult_selected").delegate("option", "dblclick", function () {
+{#                $(this).remove();#}
+                $(this).prop("selected", false);
+                $(this).parent().parent().parent().find(".mult_select").append($(this));
+            });
+
+            //多选框中的右箭头实现选择操作
+            $(".row").delegate(".glyphicon-arrow-right", "click", function () {
+                var select_tag = $(this).parent().parent().parent().find(".mult_select")
+                var selected_tag = $(this).parent().parent().parent().find(".mult_selected")
+                console.log();
+                selected_tag.append(select_tag.find("option:selected"));
+                select_tag.find("option:selected").remove();
+                selected_tag.find("option:selected").prop("selected", false);
+
+            });
+                        //多选框中的左箭头实现选择操作
+            $(".row").delegate(".glyphicon-arrow-left", "click", function () {
+                var select_tag = $(this).parent().parent().parent().find(".mult_select")
+                var selected_tag = $(this).parent().parent().parent().find(".mult_selected")
+                select_tag.append(selected_tag.find("option:selected"));
+                selected_tag.find("option:selected").remove();
+                select_tag.find("option:selected").prop("selected", false);
+
+            });
+
+        });
+
+        //数据提交前的进行多选框的全选操作
+        function Presumbit() {
+            $(".mult_selected option").each(function () {
+                $(this).prop("selected", true);
+            })
+            //提交前将去除掉disabled属性，以免提交的值为空
+            $("[disabled]").removeProp("disabled")
+            $(".form-horizontal").submit();
+        };
+
+    </script>
+{% endblock %}
+{% block css %}
+    <style>
+        .filter_mult_select {
+            height: 200px !important;
+            width: 200px;
+        }
+    </style>
+{% endblock %}

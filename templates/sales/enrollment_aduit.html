@@ -1,0 +1,31 @@
+{% extends "index.html" %}
+
+{% block page-content %}
+    <h3>学员注册信息复核</h3>
+    <div class="row form-horizontal col-md-6 clearfix">
+    {% for field in customerform_obj %}
+            <p>
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}" class="col-md-4 control-label">{{ field.label }}</label>
+                <div class="col-md-8">
+                    {{ field }}
+                </div>
+            </div>
+            </p>
+        {% endfor %}
+    <div class="row">
+        <div class="col-md-5">
+{#        <a href="{% url 'enroll_reject' enroll_id %}" class="btn btn-warning pull-right">驳回</a>#}
+        </div>
+
+            <a href="{% url "enroll_payment" enroll_id %}" class="btn btn-success pull-right">下一步</a>
+    </div>
+    </div>
+
+{% endblock %}
+{% block js %}
+    <script>
+        $("input:not([disabled])").prop("disabled",true);
+        $("select:not([disabled])").prop("disabled",true);
+    </script>
+{% endblock %}

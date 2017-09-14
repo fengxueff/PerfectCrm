@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+{% load crm_tags %}
+{% block content %}
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                        aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="http://192.168.31.179:8000/account/login/">PerfectCRM</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2>学员报名信息填报</h2>
+        <div id="wizard">
+            <ol>
+                <li>学员补录信息</li>
+                <li>提交报名合同协议</li>
+                <li>上传身份信息</li>
+            </ol>
+            <div>
+                <p>
+                <form class="form-horizontal" id="form_0" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="page" value="0">
+
+                    {% for field in customerform_obj %}
+                        <div class="form-group">
+                            <label for="{{ field.id_for_label }}"
+                                   class="col-md-1 control-label">{{ field.label_tag }}</label>
+                            <div class="col-md-8 ">
+                                {{ field }}
+                            </div>
+                            {% if field.errors %}
+                                <div class="alert alert-danger alert-dismissable col-md-2"
+                                     style="margin: 0;padding:0 25px;height: 32px;line-height: 32px">
+                                    <button type="button" class="close" data-dismiss="alert"
+                                            aria-hidden="true">
+                                        &times;
+                                    </button>
+                                    {{ field.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                    <hr style="border: 1px solid #dddddd;">
+                    <div class="form-group">
+                        <label for="" class="col-md-offset-1 col-md-1 control-label">所报班级</label>
+                        <div class="col-md-8 ">
+                            {{ enrollment_obj.enrolled_class }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="" class="col-md-offset-1 col-md-1 control-label">学费</label>
+                        <div class="col-md-8 ">
+                            {{ enrollment_obj.enrolled_class.course.price }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="" class="col-md-offset-1 col-md-1 control-label">开课时间</label>
+                        <div class="col-md-8 ">
+                            {{ enrollment_obj.enrolled_class.start_date }}
+                        </div>
+                    </div>
+
+                </form>
+                </p>
+            </div>
+            <div>
+                <p>
+                <form action="" method="post" id="form_1" onsubmit="return PreSubmit();">
+                    {% csrf_token %}
+                    <input type="hidden" name="page" value="1">
+
+                    <!--提交报名合同协议-->
+                    <pre style="background-color: white;height: 600px">
+                    {% render_contract enrollment_obj %}
+                </pre>
+                    <div>
+                        <i><span id="checked_error" style="color:red"></span></i>
+                    </div>
+                    <input type="checkbox" name="checkbox" {% if enrollment_obj.contract_agreed %}checked{% endif %}>
+                    <i>是否同意上述协议条款
+                        <b>(勾选表示为同意)</b>
+
+                    </i>
+
+                </form>
+                </p>
+            </div>
+            <div>
+                <p>
+                <form action="./" class="dropzone" id="myAwesomeDropzone" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="page" value="2">
+{#                    <div class="fallback">#}
+{#                        <input name="file" type="file" multiple/>#}
+{#                    </div>#}
+                    <div class="dz-default dz-message needsclick">
+                        <div class="dz-icon icon-wrap icon-circle icon-wrap-md">
+                            <i class="fa fa-cloud-upload fa-3x"></i>
+                        </div>
+
+                    <div>
+                        <p class="dz-text">请上传身份证正反面照片</p>
+                        <p class="text-muted">最多上传2张照片</p>
+                    </div>
+        </div>
+                </form>
+                <form id="form_2" action="/account/login/" method="get" onsubmit="return PreSubmit_1();"></form>
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+{% endblock %}
+{% block css %}
+    <link href="/static/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="/static/css/bwizard.min.css" rel="stylesheet">
+    <link href="/static/css/dropzone.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+{% endblock %}
+{% block js %}
+    <script src="/static/js/bwizard.min.js"></script>
+    <script src="/static/js/dropzone.js"></script>
+    <script src="/static/js/jquery.cookie.js"></script>
+    <script src="/static/js/fastclick.js"></script>
+    <script>
+       FastClick.attach(document.body);
+        file_count = 0;
+        Dropzone.options.myAwesomeDropzone = {
+            paramName: "file", // The name that will be used to transfer the file
+            maxFilesize: 10, // MB
+            maxFiles: 2,
+{#            dictDefaultMessage: "请上传身份证正反面照片",#}
+            dictFileTooBig: "文件大小不能超过10M",
+            addRemoveLinks: true,
+            dictRemoveLinks: "x",
+            dictCancelUpload: "x",
+            accept: function (file, done) {
+                if (file.name == "justinbieber.jpg") {
+                    done("Naha, you don't.");
+                }
+                else {
+                    done();
+                }
+            },
+            init: function () {
+                //上传文件是判断文件的个是是否大于2
+                this.on("addedfile", function (file) {
+                    console.log("----------",this.files);
+                    //上传文件时触发的事件
+                    file_count = this.files.length;
+                    if(file_count>2){
+                        alert("文件数量不能超过2个");
+                        this.removeFile(file);
+                    }
+                });
+                this.on("queuecomplete", function (file) {
+                    //上传完成后触发的方法
+
+                });
+                this.on("success", function (file) {
+                    console.log("File " + file.name + "uploaded");
+                    alert(file);
+                });
+
+                this.on("removedfile", function (file) {
+                    console.log("File " + file.name + "removed");
+                     $.ajax({
+                        type: 'post',
+                        url: "./",
+                        data:{"type":"delete","file_name":file.name},
+                        headers:{"X-CSRFtoken":$.cookie("csrftoken")},
+                        success: function (result) {
+                            alert(result);
+
+                        }
+                    });
+                });
+            }
+        };
+    </script>
+    <script type="text/javascript">
+        var a = $("#wizard").bwizard(options = {clickableSteps: false, activeIndex:{{ page }}, disabled: true});
+        //当在最后一页时的处理逻辑
+        if({{ page }}=="2"){
+            $(".next,.disabled").children().eq(0).text("确定");
+            $(".next,.disabled").removeClass("disabled");
+        }
+
+        $(".next a").click(function () {
+            $("[disabled]").removeProp("disabled")
+            $("#form_{{ page }}").submit();
+        });
+
+        $(".previous:not(.disabled) a").click(function () {
+            url = "/crm/customer/registration_back/" + String({{ enrollment_obj.id }}) + "/";
+            console.log(url);
+            $.ajax({
+                type: 'GET',
+                url: url,
+                data: {page:{{page}}},
+                success: function (url_path) {
+                    location.href = url_path;
+
+                }
+            });
+        });
+
+        function PreSubmit() {
+            checked_flag = $("#form_1 :checkbox").prop("checked");
+            if (checked_flag == false) {
+                $("#checked_error").text("协议必须在同意的条件进行")
+            }
+            console.log(checked_flag)
+
+            return checked_flag;
+        };
+
+        function PreSubmit_1() {
+{#            var dropz = new Dropzone("#myAwesomeDropzone");#}
+            if(file_count==2){
+                return true;
+            }else{
+                alert("必须上传两张身份证照片");
+                return false;
+            }
+        };
+    </script>
+{% endblock %}
+
+
+</body></html>

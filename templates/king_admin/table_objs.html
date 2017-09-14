@@ -1,0 +1,387 @@
+{% extends "king_admin/base.html" %}
+{% load tags %}
+
+
+{% block breadcrumb %}
+    <ol class="breadcrumb" >
+        <li><a href="/king_admin/">Home</a></li>
+        <li><a href="/king_admin/{{ app_name }}">{{ app_name }}</a></li>
+        <li class="active">Data</li>
+    </ol>
+{% endblock %}
+
+{% block content %}
+
+    <div class="row " style="margin-top: 50px">
+        <div class="panel panel-info " style="padding: 0">
+            <div class="panel-heading">
+                {{ table_name }}
+                <!--如果readonly_table为true就不显示添加按钮-->
+                <a id="add-bnt"href="add/" class="pull-right" {% if admin_class.readonly_table %}style="display:none"{% endif %}>
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                </a>
+            </div>
+            <div class="panel-body">
+                <form action="" method="get">
+                    {% if admin_class.search_field %}
+                        <div class="row"
+                             style="margin-left:1px;margin-right: 1px;background-color: #f8f8f8;border:1px solid #eee;padding: 8px 10px;">
+                            <div class="col-xs-1" style="margin-right: -70px;height:38px;line-height: 38px;">
+
+                            </div>
+
+                            <div class="col-md-4" style="margin-bottom: 10px">
+                                <div class="input-group">
+                                    <span class="input-group-addon">
+                                        <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                                    </span>
+                                    <input type="search" name="search_text" value="{{ request.GET.search_text }}"
+                                       placeholder="search_fields：{% for search_field in admin_class.search_field %}{{ search_field }}  {% endfor %}"
+                                       class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-1">
+                                <button type="submit" class="btn btn-success">搜索</button>
+                            </div>
+                        </div>
+                    {% endif %}
+                    {% if table_filter %}
+                        <div class="row" style="margin-left:1px;margin-right: 1px;background-color: #f8f8f8;border:1px solid #eee;padding: 8px 10px;">
+
+                            {% for condition in table_filter %}
+                                {% rander_table_filter condition admin_class selected_filters %}
+                            {% endfor %}
+
+
+                            <div class="col-md-1">
+                            <br>
+                                <button type="submit" class="btn btn-success">过滤</button>
+                            </div>
+                        </div>
+                    {% endif %}
+                </form>
+            {% if admin_class.actions %}
+                 <div class="row" style="margin-left:1px;margin-right: 1px;background-color: #f8f8f8;border:1px solid #eee;padding: 8px 10px;">
+                    <form id="custom_action" action="" method="post" onsubmit="return CustomAction();">
+                        {% csrf_token %}
+                        <input type="hidden" name="app_name" value="{{ app_name }}">
+                        <input type="hidden" name="table_name" value="{{ table_name }}">
+                        <input id="ids" type='hidden' name='ids' value="">
+                        <div class="col-md-1" style="margin-right: -35px"><i style="line-height: 44px">Action:</i></div>
+                        <div class="col-md-2 " style="margin-bottom: 5px;margin-top: 5px">
+                            <div class="input-group">
+                                <select name="select_action" class="form-control">
+                                    <option>-------------</option>
+                                    {% for desc,action in admin_class.actions.items %}
+                                        <option value="{{ forloop.counter0 }}">{{ desc }}</option>
+                                    {% endfor %}
+                                </select>
+                                <span class="input-group-btn"><button class="btn btn-default" type="submit" >go</button></span>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            {% endif %}
+
+
+                <table  class="layui-table" lay-filter="Mytable"  lay-data="{% templatetag openbrace %}id:'test'{% templatetag closebrace %}">
+                    
+                    <thead>
+                    <tr>
+                    {% if admin_class.list_display %}
+
+                        {% for table_field in table_title %}
+                            {% build_order table_field order_key_dict selected_filters request admin_class%}
+                        {% endfor %}
+                    {% else %}
+                        {% build_order "table_obj" order_key_dict selected_filters request admin_class%}
+                    {% endif %}
+                    <th lay-data="{field:'delete', width:80}"></th>
+                    {% if admin_class.actions %}
+                    <th lay-data="{checkbox:true,templet: '#titleTpl'}"></th>
+                    {% endif %}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <!--
+{#                                {% for row in table_data %}#}
+{#                                    <tr>#}
+{#                                        {% for row_field in row %}#}
+{#                                            <!--row_field中有chocie中的情况下,那就需要使用到build_td的自定义函数了-->#}
+{#                                            <td>{% bulid_td admin_class forloop.counter0 row_field %}</td>#}
+{#                                        {% endfor %}#}
+{#                                    </tr>#}
+{#                                </tbody>#}
+{#                                {% endfor %}#}
+                                -->
+                    {#                                {% get_query_sets admin_class as query_sets %}#}
+                    {% for obj in query_sets %}
+
+                            {% build_table_row obj admin_class request %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                    <tfoot>
+                    <tr>
+                        <td>总计：{{ paginator.count }}条</td>
+                    </tr>
+                    </tfoot>
+                    <!--通过点击删除按钮来弹出模态对话框-->
+                    {% include "king_admin/delete_table_obj_modal.html" %}
+                </table>
+                    <i>总计：{{ paginator.count }}条</i>
+
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        {% build_order_page_num order_key_dict as order_page %}
+                        {% build_search_page_num request as search_page %}
+                        {% build_filter_page_num selected_filters as filter_page %}
+                        {% if query_sets.has_previous %}
+                            <li>
+                                <a href="?page=
+                                        {{ query_sets.previous_page_number }}{{ filter_page }}{{ order_page }}{{ search_page }}"
+                                   aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
+                            </li>
+                        {% else %}
+                            <li class="disabled">
+                                <a href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
+                            </li>
+                        {% endif %}
+
+                        {% build_paginators query_sets selected_filters order_key_dict request %}
+
+                        {% if query_sets.has_next %}
+                            <li>
+                                <a href="?page=
+                                        {{ query_sets.next_page_number }}{{ filter_page }}{{ order_page }}{{ search_page }}">»</a>
+                            </li>
+                        {% else %}
+                            <li class="disabled">
+                                <a href="#">»</a>
+                            </li>
+                        {% endif %}
+                        <li ><a href="?show_all" id="show-all" style="margin-left: 0;">show all</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block css %}
+
+    <style>
+        #show-all{
+            border: 0;
+            padding-top: 15px;
+            font-style: italic;
+        }
+        #show-all:hover{
+            background-color: white;
+            cursor: pointer;
+        }
+        #add-bnt{
+            color:white;
+            margin-top:-3px;
+            margin-right: -6px;
+            padding: 3px 3px;
+            font-size: small;
+            border-radius: 50%;
+            background-color: black;
+            opacity:0.7;
+        }
+        #add-bnt:hover{
+            background-color: black;
+            margin-top: -9px;
+            font-size: large;
+            margin-right: -10px;
+            padding: 7px 7px;
+            opacity: 1;
+        }
+        .hide{
+            display: None;
+        }
+    </style>
+
+    <link href="http://cdn.bootcss.com/twitter-bootstrap/2.2.2/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="http://cdn.bootcss.com/prettify/r224/prettify.css" rel="stylesheet">
+    <link href="/static/css/bootstrap-datetimepicker.css" rel="stylesheet">
+
+
+{% endblock %}
+{% block js %}
+    <script src="/static/js/layer.js"></script>
+    <script src="/static/js/jquery.cookie.js"></script>
+    <script src="/static/js/layui.js"></script>
+{#    <script type="text/html" id="Mybar">#}
+{#        <a class="layui-btn layui-btn-danger layui-btn-mini" lay-event="del">删除</a>#}
+{#    </script>#}
+
+    <script>
+
+        $('#myModal').modal({
+                backdrop: 'static',
+                show:false
+        });
+
+        $("#back_delete").click(function () {
+            $("#myModal").modal("hide");
+        });
+
+
+        $(".table-tr").each(function(){
+            $(this).on('mouseover',(function(){
+                $(this).find(".layui-btn-danger").removeClass("hide")
+            }));
+
+            $(this).mouseout(function(){
+                $(this).find(".layui-btn-danger").addClass("hide")
+            });
+
+            //绑定删除按钮的点击事件
+            var tr = $(this).children();
+            tr_count = tr.length;
+            var delete_btn = tr.eq(tr_count-1);
+            delete_btn.click(function () {
+                var a_tag = $(this).children();
+                delete_table_obj(a_tag);
+            })
+        });
+
+
+        //ajax处理删除事件的具体操作
+        function delete_table_obj(a_tag) {
+
+            var app_name = a_tag.attr("app_name");
+            var table_name = a_tag.attr("table_name");
+            //上面两个根本用不上
+            var data_id = a_tag.attr("data_id");
+            var form = new FormData();
+            url = "delete/"+data_id+"/";
+            $.ajax({
+                type: 'GET',
+                url: url,
+                data:"",
+                success: function (result) {
+                    console.log(result);
+                    $(".modal-body").html(result);
+
+                }
+            })
+        };
+
+
+        $('#confirm_delete').on('click', function(){
+            layer.msg('是否确定要删除数据', {
+                btn: ['是', '否',],
+                time:0,
+                btn1:function (index,layero) {
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data:{"operation_type":"delete"},
+                        headers:{"X-CSRFtoken":$.cookie("csrftoken")},
+                        success: function (result) {
+                            result = JSON.parse(result);
+                            //数据也可以使用result["data"]来取值
+                            layer.msg(result.data,{anim: 0},function () {
+                                location.reload();
+                            });
+
+                        }
+                    });
+                }
+            });
+        });
+
+        checkbox_list = []
+         layui.use('table', function(){
+            var table = layui.table;
+             //转换静态表格
+            table.init('Mytable', {
+              height: 500, //设置高度
+                 even:true
+              //支持所有基础参数
+            });
+            //监听工具条
+            table.on('tool(Mytable)', function(obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+                var data = obj.data; //获得当前行数据
+                var layEvent = obj.event; //获得 lay-event 对应的值
+                var tr = obj.tr; //获得当前行 tr 的DOM对象
+                var a_tag = $(tr).find(".layui-btn-danger");
+                $('#myModal').modal("show");
+                delete_table_obj(a_tag);
+            });
+
+            //查找数组下标函数
+            Array.prototype.indexOf = function(val) {
+                for (var i = 0; i < this.length; i++) {
+                if (this[i] == val) return i;
+                }
+                return -1;
+            };
+            //删除数组元素函数
+            Array.prototype.remove = function(val) {
+                var index = this.indexOf(val);
+                if (index > -1) {
+                    this.splice(index, 1);
+                }
+            }
+
+            //监听复选框选择
+            table.on('checkbox(Mytable)', function(obj){
+                //如果触发的是全选，则为：all，如果触发的是单选，则为：one
+                if(obj.type=="one"){
+                    //当前是否选中状态
+                    if(obj.checked){
+                        obj_split = obj.data.delete.split(" ");
+                        for(var i=0;i<obj_split.length;i++){
+                            if(obj_split[i].match("data_id=")){
+                                var regexp = /(\d+)/g;
+                                var id =  obj_split[i].match(regexp)[0];
+                               console.log(id);
+                               checkbox_list.push(id);
+                            }
+                        }
+
+                        console.log(checkbox_list)
+                    }else{
+                        obj_split = obj.data.delete.split(" ");
+                        for(var i=0;i<obj_split.length;i++){
+                            if(obj_split[i].match("data_id=")){
+                                var regexp = /(\d+)/g;
+                                var id =  obj_split[i].match(regexp)[0];
+                               checkbox_list.remove(id);
+                            }
+                        }
+
+                        console.log(checkbox_list);
+                    }
+                }
+                if(obj.type== "all"){
+                    var checkStatus = table.checkStatus('test'); //test即为参数id设定的值
+                    console.log(checkStatus);
+
+                    if(checkStatus.isAll){
+                        checkbox_list = []
+                        checkbox_list.push("__all__")
+                        console.log(checkbox_list)
+                    }else{
+                        checkbox_list = []
+                        console.log(checkbox_list)
+                    }
+
+                }
+            });
+        });
+        function CustomAction() {
+            var ids = checkbox_list.toString();
+
+            $("#ids").attr("value",ids);
+            console.log($("#custom_action"));
+            return true
+
+            }
+
+    </script>
+{% endblock %}
+

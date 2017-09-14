@@ -1,0 +1,65 @@
+{% extends "index.html" %}
+
+{% block page-content %}
+    <h3>学员注册报名</h3>
+    {% if modelform_obj.errors %}
+        <div class="row">
+            <div class="col-md-offset-2 col-md-4">
+                <div class="alert alert-danger alert-dismissable">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">
+                        &times;
+                    </button> {% for key,error in modelform_obj.errors.items %}
+                    {{ error }}
+                {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    {% if msg_link %}
+        <div class="row">
+            <div class="col-md-offset-1 col-md-5"
+                 style="border-radius:5px;position: relative;height: 50px;background-color: #dddddd">
+                将协议链接发送给客户：<span id="copy_context" style="line-height:50px;">{{ msg_link }}</span>
+                <div style="position: absolute;top:0;right:0;">
+                    <a id="copy" class="btn btn-success" >复制</a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    <form action="" method="post" class="form-horizontal col-md-6" role="form">
+        {% csrf_token %}
+        <p>
+        <div class="form-group">
+            <label for="customer" class="col-md-4 control-label">客户</label>
+            <div class="col-md-8">
+                <input class="form-control" id="customer" value="{{ obj }}" disabled>
+            </div>
+        </div>
+        </p>
+        {% for field in modelform_obj %}
+            <p>
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}" class="col-md-4 control-label">{{ field.label }}</label>
+                <div class="col-md-8">
+                    {{ field }}
+                </div>
+            </div>
+            </p>
+        {% endfor %}
+        <div class="row">
+            <button type="submit" class="btn btn-success pull-right ">下一步</button>
+        </div>
+
+    </form>
+{% endblock %}
+{% block js %}
+    <!--粘贴复制的js-->
+    <script src="/static/js/clipboard.js"></script>
+    <script>
+        $("#copy").click(function (e) {
+            var cpTxt = $("#copy_context").text();
+            clipboard.copy(cpTxt);
+        });
+
+    </script>
+{% endblock %}

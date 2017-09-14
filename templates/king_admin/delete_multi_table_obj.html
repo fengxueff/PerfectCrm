@@ -1,0 +1,38 @@
+{% extends "king_admin/base.html" %}
+{% block content %}
+    <div class="row" style="margin-top: 50px;">
+        <div class="col-md-4">
+            {{ html_content }}
+        </div>
+    </div>
+
+    {% if error %}
+        <br>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="alert alert-danger alert-dismissable">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">
+                        &times;
+                    </button>{{ error }}
+                </div>
+            </div>
+        </div>
+        <br>
+    {% endif %}
+    <!--此表单是想模拟action表单的动作，好让这个动作符合自定义action的要求，最终能将逻辑走到king-admin中自定义的方法中-->
+    <form id="custom_action" action="" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="app_name" value="{{ app_name }}">
+        <input type="hidden" name="table_name" value="{{ table_name }}">
+        <input id="ids" type='hidden' name='ids' value="{{ ids }}">
+        <input type="hidden" name="select_action" value="{{ select_action }}">
+        <input type="hidden" name="confirm_delete">
+     <div class="row">
+        <div class="col-md-4">
+            <button type="button" class="btn btn-default" id="back_delete" onclick="javascript:location.href='';">返回</button>
+            <button type="submit" class="btn btn-danger" style="margin-left: 80px;" id="confirm_delete" {% if error %}disabled{% endif %}>删除</button>
+        </div>
+     </div>
+    </form>
+
+{% endblock %}

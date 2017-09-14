@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<!-- saved from url=(0041)http://v3.bootcss.com/examples/dashboard/ -->
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!--link rel="icon" href="http://v3.bootcss.com/favicon.ico"-->
+
+    <title>PerfectCrm</title>
+<link rel="stylesheet" href="/static/js/css/layui.css">
+    <!-- Bootstrap core CSS -->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="/static/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="/static/css/dashboard.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="/static/js/ie-emulation-modes-warning.js"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    {% block css %}
+
+    {% endblock %}
+</head>
+<body>
+{% load tags %}
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                        aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="http://v3.bootcss.com/examples/dashboard/#">KingAdmin</a>
+            </div>
+            <div id="navbar" class="navbar-collapse collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="http://v3.bootcss.com/examples/dashboard/#">{{ request.user.name }}</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    {% block breadcrumb %}
+
+    {% endblock %}
+
+    <div class="container " style="margin-left:50px ">
+        {% block content %}
+
+        {% endblock %}
+    </div>
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="/static/js/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="/static/js/jquery.min.js"><\/script>')</script>
+<script src="/static/js/bootstrap.min.js"></script>
+<!-- Just to make our placeholder images work. Don't actually copy the next line! -->
+<script src="/static/js/holder.min.js"></script>
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<script src="/static/js/ie10-viewport-bug-workaround.js"></script>
+{% block js %}
+
+{% endblock %}
+<audio controls="controls" style="display: none;"></audio>
+</body>
+<style type="text/css">#yddContainer {
+    display: block;
+    font-family: Microsoft YaHei;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    top: -4px;
+    left: -4px;
+    font-size: 12px;
+    border: 1px solid
+}
+
+#yddTop {
+    display: block;
+    height: 22px
+}
+
+#yddTopBorderlr {
+    display: block;
+    position: static;
+    height: 17px;
+    padding: 2px 28px;
+    line-height: 17px;
+    font-size: 12px;
+    color: #5079bb;
+    font-weight: bold;
+    border-style: none solid;
+    border-width: 1px
+}
+
+#yddTopBorderlr .ydd-sp {
+    position: absolute;
+    top: 2px;
+    height: 0;
+    overflow: hidden
+}
+
+.ydd-icon {
+    left: 5px;
+    width: 17px;
+    padding: 0px 0px 0px 0px;
+    padding-top: 17px;
+    background-position: -16px -44px
+}
+
+.ydd-close {
+    right: 5px;
+    width: 16px;
+    padding-top: 16px;
+    background-position: left -44px
+}
+
+#yddKeyTitle {
+    float: left;
+    text-decoration: none
+}
+
+#yddMiddle {
+    display: block;
+    margin-bottom: 10px
+}
+
+.ydd-tabs {
+    display: block;
+    margin: 5px 0;
+    padding: 0 5px;
+    height: 18px;
+    border-bottom: 1px solid
+}
+
+.ydd-tab {
+    display: block;
+    float: left;
+    height: 18px;
+    margin: 0 5px -1px 0;
+    padding: 0 4px;
+    line-height: 18px;
+    border: 1px solid;
+    border-bottom: none
+}
+
+.ydd-trans-container {
+    display: block;
+    line-height: 160%
+}
+
+.ydd-trans-container a {
+    text-decoration: none;
+}
+
+#yddBottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 22px;
+    line-height: 22px;
+    overflow: hidden;
+    background-position: left -22px
+}
+
+.ydd-padding010 {
+    padding: 0 10px
+}
+
+#yddWrapper {
+    color: #252525;
+    z-index: 10001;
+    background: url(chrome-extension://eopjamdnofihpioajgfdikhhbobonhbb/ab20.png);
+}
+
+#yddContainer {
+    background: #fff;
+    border-color: #4b7598
+}
+
+#yddTopBorderlr {
+    border-color: #f0f8fc
+}
+
+#yddWrapper .ydd-sp {
+    background-image: url(chrome-extension://eopjamdnofihpioajgfdikhhbobonhbb/ydd-sprite.png)
+}
+
+#yddWrapper a, #yddWrapper a:hover, #yddWrapper a:visited {
+    color: #50799b
+}
+
+#yddWrapper .ydd-tabs {
+    color: #959595
+}
+
+.ydd-tabs, .ydd-tab {
+    background: #fff;
+    border-color: #d5e7f3
+}
+
+#yddBottom {
+    color: #363636
+}
+
+#yddWrapper {
+    min-width: 250px;
+    max-width: 400px;
+}</style>
+</html>

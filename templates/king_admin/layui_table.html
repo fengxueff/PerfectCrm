@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/static/js/css/layui.css">
+</head>
+<body>
+    <table id="demo"></table>
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/layui.js"></script>
+    <script>
+        layui.use('table', function(){
+            var table = layui.table;
+            //执行渲染
+            table.render({
+                url:"/king_admin/crm/customer/show_layui_data",
+                elem: '#demo' //指定原始表格元素选择器（推荐id选择器）
+                ,height: 315 //容器高度
+                ,cols: [
+                        [
+                            {field:"id",title:"id",width:80},
+                            {field:"qq",title:"qq",width:80},
+                            {field:"name",title:"name",width:80},
+                            {field:"source",title:"source",width:80},
+                            {field:"referral_from",title:"referral_from",width:120},
+                            {field:"consultant",title:"consultant",width:120},
+                            {field:"consult_course",title:"consult_course",width:120}
+                        ]
+
+                ]
+            });
+        });
+
+    </script>
+</body>
+</html>

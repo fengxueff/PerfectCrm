@@ -1,0 +1,33 @@
+{% extends "king_admin/base.html" %}
+{% load tags %}
+{% block content %}
+    <div class="row " style="margin-top: 50px">
+        <div class="panel panel-info " style="padding: 0">
+            {% for app_name,tables in table_list.items %}
+
+                <table class="table table-hover table-responsive">
+                    <div class="panel-heading">
+                        {{ app_name }}
+                    </div>
+                    {% for table_name,admin_class in tables.items %}
+                        <tbody>
+                        <tr>
+                            <td>
+                                <!--获取表名对应的verbose_name-->
+                                <a href="{{ app_name }}/{{ table_name }}/">{% render_app_name admin_class %}</a>
+                            </td>
+                            <td>
+                                add
+                            </td>
+                            <td>
+                                change
+                            </td>
+                        </tr>
+                        </tbody>
+                    {% endfor %}
+
+                </table>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

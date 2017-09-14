@@ -1,0 +1,42 @@
+{% extends "student/stu_index.html" %}
+{% load stu_tags %}
+{% block page-content %}
+
+    <div class="panel panel-default">
+
+  <!-- Default panel contents -->
+  <div class="panel-heading">我的课程</div>
+
+  <!-- Table -->
+  <table class="table table-hover table-responsive">
+    <thead>
+        <tr>
+            <td>课程节次</td>
+            <td>上课日期</td>
+            <td>是否有作业</td>
+            <td>作业标题</td>
+            <td>签到状态</td>
+            <td>成绩</td>
+            <td>作业管理</td>
+        </tr>
+    </thead>
+      <tbody>
+      {% for studyrecord in studyrecord_queryset %}
+          <tr>
+            <td>{{ studyrecord.course_record.day_num }}</td>
+          <td>{{ studyrecord.course_record.date }}</td>
+          <td>{{ studyrecord.course_record.has_homework }}</td>
+          <td>{{ studyrecord.course_record.homework_title }}</td>
+              <!--通过get_字段_display的这种方式获取到choice字段对应的中文值-->
+          <td>{{ studyrecord.get_attendance_display }}</td>
+          <td>{{ studyrecord.get_score_display }}</td>
+          <td><a href='{% url "homework_detail" studyrecord.id %}'>作业管理</a></td>
+          </tr>
+      {% endfor %}
+
+
+      </tbody>
+
+  </table>
+</div>
+{% endblock %}

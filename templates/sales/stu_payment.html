@@ -1,0 +1,47 @@
+{% extends "index.html" %}
+
+{% block page-content %}
+    <h3>学员缴费</h3>
+    <div class="row form-horizontal col-md-6 clearfix">
+            <p>
+            <div class="form-group">
+                <label  class="col-md-4 control-label">客户</label>
+                <div class="col-md-8">
+                    {{ customer_obj }}
+                </div>
+            </div>
+            </p>
+            <p>
+            <div class="form-group">
+                <label  class="col-md-4 control-label">所报课程</label>
+                <div class="col-md-8">
+                    {{ enroll_obj.enrolled_class.course }}
+                </div>
+            </div>
+            </p>
+        <form action="" method="post">
+                {% csrf_token %}
+            <p>
+
+            <div class="form-group">
+                <label  class="col-md-4 control-label">缴费金额</label>
+                <div class="col-md-8">
+                    <input type="text" class="form-control" name="amount" placeholder="不得少于500">&nbsp;&nbsp;<span style="color:red">{{ error }}</span>
+                </div>
+            </div>
+
+            </p>
+    <div class="row">
+        <div class="col-md-5">
+        </div>
+
+            <button class="btn btn-success pull-right" type="submit">确定</button>
+    </div>
+    </form>
+    </div>
+
+{% endblock %}
+{% block js %}
+    <script>
+    </script>
+{% endblock %}

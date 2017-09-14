@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="http://v3.bootcss.com/examples/dashboard/#">PerfectCRM</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+              <!--在完成自定义认证后，UserProfile表就成为了认证表，而在request中它对应的就是user-->
+{#            <li><a href="http://v3.bootcss.com/examples/dashboard/#">{{ request.user.userprofile.name }}</a></li>#}
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                    {{ request.user.name }} <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">编辑</a></li>
+                        <li><a href="{% url "access_logout" %}">注销</a></li>
+                    </ul>
+                </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+          <ul class="nav nav-sidebar">
+              {% for role in request.user.roles.all %}
+                  {% for menu in role.menus.all %}
+                      <li><a href="{% if menu.url_type == 0 %}{% url menu.url_name %}{% else %}{{ menu.url_name }}{% endif %}">{{ menu.name }}</a></li>
+                  {% endfor %}
+              {% endfor %}
+          </ul>
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+          {% block page-content %}
+          {% endblock %}
+        </div>
+
+      </div>
+    </div>
+{% endblock %}
